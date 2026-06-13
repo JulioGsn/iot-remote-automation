@@ -53,7 +53,7 @@ Elimina a necessidade de debug serial para saber o estado da conectividade.
 - **Biblioteca consolidada**: `Adafruit_NeoPixel` é madura e simples de usar.
 
 ### Como funciona no projeto
-Funciona como um **letreiro de reunião** — ao receber um comando MQTT no tópico `home/escritorio/status`, acende:
+Funciona como um **letreiro de reunião** — ao receber um comando MQTT no tópico `home/escritorio/status/cmd`, acende:
 - **Vermelho** → `"reuniao"` (não perturbe)
 - **Amarelo** → `"foco"` (modo foco, não interrompa)
 - **Verde** → `"livre"` (pode falar comigo)
@@ -167,7 +167,7 @@ Após cada movimento, publica o estado atual no tópico `home/seguranca/porta/st
 
 | Especificação | Detalhe |
 |---|---|
-| **Broker** | 192.168.1.100 (porta 1883) |
+| **Broker** | Mosquitto Docker (`localhost:1883`; no Wokwi, `10.0.2.2:1883`) |
 | **Keep Alive** | 30 segundos |
 | **QoS** | 0 (padrão do PubSubClient) |
 | **Cliente ID** | `esp32_home_office` |
@@ -188,8 +188,10 @@ Após cada movimento, publica o estado atual no tópico `home/seguranca/porta/st
 
 | Tópico | Tipo | Quem publica | Finalidade |
 |---|---|---|---|
-| `home/escritorio/status` | subscribe | App/sistema externo | Comando do letreiro (reuniao/foco/livre) |
+| `home/escritorio/status/cmd` | subscribe | App/sistema externo | Comando do letreiro (reuniao/foco/livre) |
+| `home/escritorio/status` | publish | ESP32 | Estado atual do letreiro |
 | `home/server/power/cmd` | subscribe | App/sistema externo | Ligar Home Server (pulso relé) |
+| `home/server/power/state` | publish | ESP32 | Estado do pulso do Home Server (ON/OFF) |
 | `home/seguranca/porta/cmd` | subscribe | App/sistema externo | Trancar/destrancar fechadura |
 | `home/interfone/abrir` | subscribe | App/sistema externo | Abrir portão do interfone |
 | `home/cozinha/fogao/temperatura` | publish | ESP32 | Leitura do DHT22 |

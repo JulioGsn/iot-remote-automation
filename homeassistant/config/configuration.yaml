@@ -14,18 +14,22 @@ scene: !include scenes.yaml
 mqtt:
   sensor:
     - name: "Temperatura Fogao"
+      unique_id: home_office_temperatura_fogao
       state_topic: "home/cozinha/fogao/temperatura"
       unit_of_measurement: "°C"
       device_class: temperature
+      state_class: measurement
 
   binary_sensor:
     - name: "Alerta Temperatura"
+      unique_id: home_office_alerta_temperatura
       state_topic: "home/cozinha/fogao/alerta"
       payload_on: "CRITICO"
       payload_off: "NORMAL"
       device_class: heat
 
     - name: "Interfone Tocando"
+      unique_id: home_office_interfone_tocando
       state_topic: "home/interfone/status"
       payload_on: "TOCANDO"
       payload_off: "SILENCIO"
@@ -33,13 +37,18 @@ mqtt:
 
   switch:
     - name: "Home Server Power"
+      unique_id: home_office_home_server_power
       command_topic: "home/server/power/cmd"
+      state_topic: "home/server/power/state"
       payload_on: "LIGAR"
       payload_off: "DESLIGAR"
+      state_on: "ON"
+      state_off: "OFF"
       icon: "mdi:server"
 
   lock:
     - name: "Fechadura Porta"
+      unique_id: home_office_fechadura_porta
       command_topic: "home/seguranca/porta/cmd"
       state_topic: "home/seguranca/porta/state"
       payload_lock: "TRAVAR"
@@ -49,13 +58,17 @@ mqtt:
 
   button:
     - name: "Abrir Portao Interfone"
+      unique_id: home_office_abrir_portao_interfone
       command_topic: "home/interfone/abrir"
       payload_press: "ABRIR"
-      device_class: update
+      icon: "mdi:gate"
 
   select:
     - name: "Letreiro Reuniao"
-      command_topic: "home/escritorio/status"
+      unique_id: home_office_letreiro_reuniao
+      command_topic: "home/escritorio/status/cmd"
+      state_topic: "home/escritorio/status"
+      retain: false
       options:
         - "livre"
         - "foco"

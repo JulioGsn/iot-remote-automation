@@ -12,7 +12,7 @@
 #define WIFI_SSID       "Wokwi-GUEST"
 #define WIFI_PASSWORD   ""
 
-#define MQTT_SERVER     "10.0.2.2"    // Wokwi: IP do host. Para HW real, troque p/ IP local (ex: 192.168.1.X)
+#define MQTT_SERVER     "host.wokwi.internal"  // Wokwi + Private IoT Gateway. Para HW real, use o IP local do broker.
 #define MQTT_PORT       1883
 #define MQTT_USER       ""
 #define MQTT_PASSWORD   ""
@@ -34,14 +34,16 @@
 // TOPICOS MQTT (subscribe / publish)
 // ============================================================================
 
-static const char T_FOCO_STATUS[]     = "home/escritorio/status";
-static const char T_SERVER_POWER[]    = "home/server/power/cmd";
-static const char T_PORTA_CMD[]       = "home/seguranca/porta/cmd";
-static const char T_PORTA_STATE[]     = "home/seguranca/porta/state";
-static const char T_TEMPERATURA[]     = "home/cozinha/fogao/temperatura";
-static const char T_ALERTA[]          = "home/cozinha/fogao/alerta";
-static const char T_INTERFONE[]       = "home/interfone/status";
-static const char T_INTERFONE_ABRIR[] = "home/interfone/abrir";
+static const char T_FOCO_CMD[]          = "home/escritorio/status/cmd";
+static const char T_FOCO_STATE[]        = "home/escritorio/status";
+static const char T_SERVER_POWER_CMD[]  = "home/server/power/cmd";
+static const char T_SERVER_POWER_STATE[] = "home/server/power/state";
+static const char T_PORTA_CMD[]         = "home/seguranca/porta/cmd";
+static const char T_PORTA_STATE[]       = "home/seguranca/porta/state";
+static const char T_TEMPERATURA[]       = "home/cozinha/fogao/temperatura";
+static const char T_ALERTA[]            = "home/cozinha/fogao/alerta";
+static const char T_INTERFONE[]         = "home/interfone/status";
+static const char T_INTERFONE_ABRIR[]   = "home/interfone/abrir";
 
 // ============================================================================
 // CONSTANTES
@@ -105,6 +107,7 @@ bool  servoPositionChanged = false;
 // NeoPixel
 bool  neoPixelChanged = false;
 uint32_t neoPixelTargetColor = 0;
+const char* currentOfficeStatus = "livre";
 
 // ============================================================================
 // PROTOTIPOS
@@ -120,6 +123,10 @@ void checarRele1();
 void checarRele2();
 void checarBotao();
 void atualizarServo();
+void aplicarStatusEscritorio(const String& status, bool publishState);
+void publicarEstadosIniciais();
+void publicarEstadoFechadura();
+void publicarEstadoServidor(const char* estado);
 
 // ============================================================================
 // SETUP
@@ -145,6 +152,7 @@ void setup() {
     neoPixel.setBrightness(128);
     neoPixel.clear();
     neoPixel.show();
+    setNeoPixelColor(neoPixel.Color(0, 255, 0));
 
     // DHT22
     dht.begin();
@@ -180,7 +188,7 @@ void loop() {
     } else {
         if (!wifiConnected) {
             wifiConnected = true;
-            Serial.printf("[WiFi] Conectado! IP: %s\n", WiFi.localIP().toString().c_str());
+            Serial.printf("[WiFi] Conectado! IP: %s\r\n", WiFi.localIP().toString().c_str());
         }
     }
 
@@ -229,8 +237,8 @@ void loop() {
 // ============================================================================
 
 void conectarWiFi() {
-    Serial.printf("[WiFi] Conectando a %s ...\n", WIFI_SSID);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    Serial.printf("[WiFi] Conectando a %s ...\r\n", WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6);
     lastWifiAttempt = millis();
 }
 
@@ -243,13 +251,14 @@ void conectarMQTT() {
     }
 
     if (ok) {
-        mqtt.subscribe(T_FOCO_STATUS);
-        mqtt.subscribe(T_SERVER_POWER);
+        mqtt.subscribe(T_FOCO_CMD);
+        mqtt.subscribe(T_SERVER_POWER_CMD);
         mqtt.subscribe(T_PORTA_CMD);
         mqtt.subscribe(T_INTERFONE_ABRIR);
+        publicarEstadosIniciais();
         Serial.println("[MQTT] Subscribed to all topics");
     } else {
-        Serial.printf("[MQTT] Falha (rc=%d)\n", mqtt.state());
+        Serial.printf("[MQTT] Falha (rc=%d)\r\n", mqtt.state());
     }
 }
 
@@ -265,26 +274,28 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     String t = String(topic);
     String v = String(msg);
 
-    Serial.printf("[MQTT] << %s -> %s\n", topic, msg);
+    Serial.printf("[MQTT] << %s -> %s\r\n", topic, msg);
 
     // --- AER 1: Letreiro de reuniao (NeoPixel) ---
-    if (t == T_FOCO_STATUS) {
-        if (v == "reuniao") {
-            setNeoPixelColor(neoPixel.Color(255, 0, 0));     // Vermelho
-        } else if (v == "foco") {
-            setNeoPixelColor(neoPixel.Color(255, 255, 0));   // Amarelo
-        } else if (v == "livre") {
-            setNeoPixelColor(neoPixel.Color(0, 255, 0));     // Verde
-        }
+    if (t == T_FOCO_CMD) {
+        aplicarStatusEscritorio(v, true);
     }
 
     // --- AER 2: Controle do Home Server (Rele 1) ---
-    if (t == T_SERVER_POWER && v == "LIGAR") {
-        if (!rele1Active) {
-            rele1Active = true;
-            rele1StartMs = millis();
-            digitalWrite(PIN_RELE_1, HIGH);
-            Serial.println("[Rele1] Pulso power ON");
+    if (t == T_SERVER_POWER_CMD) {
+        if (v == "LIGAR") {
+            if (!rele1Active) {
+                rele1Active = true;
+                rele1StartMs = millis();
+                digitalWrite(PIN_RELE_1, HIGH);
+                publicarEstadoServidor("ON");
+                Serial.println("[Rele1] Pulso power ON");
+            }
+        } else if (v == "DESLIGAR") {
+            rele1Active = false;
+            digitalWrite(PIN_RELE_1, LOW);
+            publicarEstadoServidor("OFF");
+            Serial.println("[Rele1] Pulso power OFF");
         }
     }
 
@@ -342,6 +353,47 @@ void setNeoPixelColor(uint32_t color) {
     neoPixelChanged = true;
 }
 
+void aplicarStatusEscritorio(const String& status, bool publishState) {
+    if (status == "reuniao") {
+        currentOfficeStatus = "reuniao";
+        setNeoPixelColor(neoPixel.Color(255, 0, 0));     // Vermelho
+    } else if (status == "foco") {
+        currentOfficeStatus = "foco";
+        setNeoPixelColor(neoPixel.Color(255, 255, 0));   // Amarelo
+    } else if (status == "livre") {
+        currentOfficeStatus = "livre";
+        setNeoPixelColor(neoPixel.Color(0, 255, 0));     // Verde
+    } else {
+        Serial.printf("[Letreiro] Status invalido: %s\r\n", status.c_str());
+        return;
+    }
+
+    if (publishState && mqtt.connected()) {
+        mqtt.publish(T_FOCO_STATE, currentOfficeStatus, true);
+    }
+}
+
+void publicarEstadoServidor(const char* estado) {
+    if (mqtt.connected()) {
+        mqtt.publish(T_SERVER_POWER_STATE, estado, true);
+    }
+}
+
+void publicarEstadoFechadura() {
+    if (!mqtt.connected()) return;
+
+    const char* estado = (currentServoPos == SERVO_TRANCADO) ? "TRANCADO" : "DESTRANCADO";
+    mqtt.publish(T_PORTA_STATE, estado, true);
+}
+
+void publicarEstadosIniciais() {
+    mqtt.publish(T_FOCO_STATE, currentOfficeStatus, true);
+    publicarEstadoServidor(rele1Active ? "ON" : "OFF");
+    publicarEstadoFechadura();
+    mqtt.publish(T_ALERTA, "NORMAL", true);
+    mqtt.publish(T_INTERFONE, "SILENCIO", true);
+}
+
 // ============================================================================
 // DHT22 - LEITURA DE TEMPERATURA
 // ============================================================================
@@ -357,7 +409,9 @@ void lerDHT22() {
         return;
     }
 
-    Serial.printf("[DHT22] Temperatura: %.1f C\n", temp);
+    Serial.printf("[DHT22] Temperatura: %.1f C\r\n", temp);
+
+    if (!mqtt.connected()) return;
 
     // Publica temperatura
     char buf[16];
@@ -368,6 +422,8 @@ void lerDHT22() {
     if (temp > TEMP_LIMITE) {
         mqtt.publish(T_ALERTA, "CRITICO", true);
         Serial.println("[DHT22] ALERTA CRITICO!");
+    } else {
+        mqtt.publish(T_ALERTA, "NORMAL", true);
     }
 }
 
@@ -381,6 +437,7 @@ void checarRele1() {
     if (millis() - rele1StartMs >= RELE1_PULSO_MS) {
         digitalWrite(PIN_RELE_1, LOW);
         rele1Active = false;
+        publicarEstadoServidor("OFF");
         Serial.println("[Rele1] Pulso power OFF");
     }
 }
@@ -414,14 +471,19 @@ void checarBotao() {
 
     bool botaoPressionado = (raw == LOW) && ((now - lastButtonChangeMs) >= BOTAO_DEBOUNCE_MS);
 
-    if (botaoPressionado && !botaoFoiPublicado && wifiConnected && mqtt.connected()) {
-        mqtt.publish(T_INTERFONE, "TOCANDO");
+    if (botaoPressionado && !botaoFoiPublicado) {
+        if (wifiConnected && mqtt.connected()) {
+            mqtt.publish(T_INTERFONE, "TOCANDO", true);
+        }
         Serial.println("[Interfone] TOCANDO!");
         botaoFoiPublicado = true;
     }
 
     // Reseta flag quando o botao for solto
     if (raw == HIGH && botaoFoiPublicado) {
+        if (wifiConnected && mqtt.connected()) {
+            mqtt.publish(T_INTERFONE, "SILENCIO", true);
+        }
         botaoFoiPublicado = false;
     }
 }
@@ -435,9 +497,7 @@ void atualizarServo() {
     servoPositionChanged = false;
 
     servo.write(currentServoPos);
-    Serial.printf("[Servo] Posicao: %d\n", currentServoPos);
+    Serial.printf("[Servo] Posicao: %d\r\n", currentServoPos);
 
-    // Publica estado
-    const char* estado = (currentServoPos == SERVO_TRANCADO) ? "TRANCADO" : "DESTRANCADO";
-    mqtt.publish(T_PORTA_STATE, estado, true);
+    publicarEstadoFechadura();
 }

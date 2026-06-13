@@ -2,6 +2,7 @@
 .pio/
 .pioenvs/
 .piolibdeps/
+compile_commands.json
 
 # VS Code (keep extensions/launch/settings for the project)
 .vscode/*.log
@@ -15,6 +16,14 @@ mosquitto/config/mosquitto.passwd
 homeassistant/config/*
 !homeassistant/config/configuration.yaml
 !homeassistant/config/ui-lovelace.yaml
+!homeassistant/config/automations.yaml
+!homeassistant/config/scripts.yaml
+!homeassistant/config/scenes.yaml
+!homeassistant/config/themes/
+!homeassistant/config/themes/.gitkeep
+!homeassistant/config/.storage/
+homeassistant/config/.storage/*
+!homeassistant/config/.storage/core.config_entries
 
 # Python
 __pycache__/

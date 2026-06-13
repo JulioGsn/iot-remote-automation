@@ -12,12 +12,13 @@
 
 - [ ] **Home Assistant rodando**
       `docker compose ps` → `iot-homeassistant` deve estar `Up`
-      Acessar http://localhost:8123 — deve carregar o onboarding ou o dashboard.
+      Acessar http://localhost:8124 — deve carregar o onboarding ou o dashboard.
+      Se quiser usar a porta padrão e ela estiver livre: `HA_PORT=8123 docker compose up -d`.
 
 - [ ] **Home Assistant: integração MQTT configurada**
       Settings → Devices & Services → deve aparecer "MQTT" como integração.
+      A entrada já vem pré-configurada em `homeassistant/config/.storage/core.config_entries`.
       Broker: `mosquitto` / Porta: `1883` / Sem usuário/senha.
-      Se não estiver lá, precisa adicionar manualmente.
 
 ---
 
@@ -28,7 +29,7 @@
 
 - [ ] **Configurações de rede corretas** (`src/main.cpp`)
       - `WIFI_SSID` — qualquer string (Wokwi simula, não valida)
-      - `MQTT_SERVER` — `"10.0.2.2"` para Wokwi, ou IP local da máquina para HW real
+      - `MQTT_SERVER` — `"host.wokwi.internal"` para Wokwi com Private IoT Gateway, ou IP local da máquina para HW real
       - `MQTT_USER` / `MQTT_PASSWORD` — vazio (acesso anônimo)
 
 - [ ] **Firmware compilada atualizada**
@@ -45,6 +46,11 @@
 - [ ] **Simulação inicia sem erros**
       Abrir `diagram.json` → clicar "Start Simulation" (ícone verde no canto superior direito).
       Deve mostrar o diagrama com ESP32 + componentes + labels visíveis.
+
+- [ ] **Private Wokwi IoT Gateway habilitado**
+      No VS Code, abrir Command Palette (`F1`) → **Enable Private Wokwi IoT Gateway**.
+      Necessário para o ESP32 simulado acessar o Mosquitto local em `localhost:1883`.
+      Sem isso, o Serial Monitor fica com `[MQTT] Falha (rc=-2/-4)` e o Mosquitto não mostra o cliente `esp32_home_office`.
 
 - [ ] **Serial Monitor aparecendo**
       No Wokwi panel ou View → Serial Monitor.
@@ -79,13 +85,13 @@ Testar cada tópico que o ESP32 escuta. Publicar do terminal e verificar:
 - [ ] **Letreiro Reunião**
       ```bash
       docker compose exec mosquitto mosquitto_pub \
-        -h localhost -t "home/escritorio/status" -m "reuniao"
+        -h localhost -t "home/escritorio/status/cmd" -m "reuniao"
       ```
       NeoPixel deve acender VERMELHO no simulador.
 
       ```bash
       docker compose exec mosquitto mosquitto_pub \
-        -h localhost -t "home/escritorio/status" -m "livre"
+        -h localhost -t "home/escritorio/status/cmd" -m "livre"
       ```
       NeoPixel deve acender VERDE.
 
@@ -95,6 +101,7 @@ Testar cada tópico que o ESP32 escuta. Publicar do terminal e verificar:
         -h localhost -t "home/server/power/cmd" -m "LIGAR"
       ```
       Relé 1 (LED vermelho "Home Server") deve acender por ~1s.
+      Estado MQTT: `home/server/power/state` deve ir para "ON" e voltar para "OFF".
 
 - [ ] **Fechadura**
       ```bash
@@ -127,12 +134,13 @@ Testar cada tópico que o ESP32 escuta. Publicar do terminal e verificar:
       Clicar no botão no simulador Wokwi.
       Serial Monitor deve mostrar `[Interfone] TOCANDO!`
       Tópico `home/interfone/status` deve receber "TOCANDO".
+      Ao soltar o botão, o tópico deve receber "SILENCIO".
 
 ---
 
 ## 5. Home Assistant — Entidades
 
-Após configurar a integração MQTT na UI do HA, verificar:
+Após subir o Home Assistant com a integração MQTT pré-configurada, verificar:
 
 - [ ] **select.letreiro_reuniao** aparece em Settings → Devices & Services → MQTT
       Mudar o valor para "reuniao" → NeoPixel deve ficar vermelho no simulador.
@@ -158,7 +166,7 @@ Após configurar a integração MQTT na UI do HA, verificar:
 
 Se as entidades aparecerem como **"unknown"** ou **"unavailable"**:
 - A integração MQTT não está conectada ao broker.
-- Verificar passo 1 (broker rodando?) e passo 3 (HA → MQTT configurado na UI).
+- Verificar passo 1 (broker rodando?) e passo 3 (HA → MQTT pré-configurado).
 
 ---
 
@@ -200,7 +208,7 @@ Se o dashboard não carregar:
 | WiFi não conecta no Wokwi | SSID vazio ou muito curto | Usar `"Wokwi-GUEST"` |
 | MQTT rc=5 | Broker não acessível | Verificar se Mosquitto está rodando e `MQTT_SERVER` correto |
 | MQTT rc=3 | Timeout de rede | WiFi não conectou de fato |
-| Entidades HA como "unknown" | Broker não configurado na UI | Settings → Devices → Add MQTT |
+| Entidades HA como "unknown" | ESP32 ainda não publicou estado | Iniciar a simulação Wokwi ou publicar estados retidos de teste |
 | Entidades HA "unavailable" | Broker caiu após configurado | Verificar `docker compose ps` |
 | Dashboard não aparece | `lovelace: mode: yaml` ausente | Adicionar ao `configuration.yaml` e reiniciar HA |
 | Comando não afeta o simulador | Tópico MQTT não corresponde | Verificar `#define` no `main.cpp` vs `configuration.yaml` |

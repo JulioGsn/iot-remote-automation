@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Office IoT - Apresentação</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #5b6678;
+      --line: #d9e0ea;
+      --primary: #0f766e;
+      --accent: #b45309;
+      --danger: #b91c1c;
+      --ok: #15803d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    main {
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+      padding: 7vh 8vw 8vh;
+      background: var(--surface);
+    }
+
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+    }
+
+    .title-slide {
+      background:
+        linear-gradient(90deg, rgba(15, 118, 110, 0.95), rgba(31, 41, 55, 0.88)),
+        linear-gradient(135deg, #0f766e, #1f2937);
+      color: #fff;
+    }
+
+    .title-slide .kicker {
+      color: #d5f5ef;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      line-height: 1.06;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 960px;
+      font-size: clamp(46px, 8vw, 86px);
+    }
+
+    h2 {
+      color: var(--primary);
+      font-size: clamp(34px, 5vw, 60px);
+    }
+
+    .title-slide h2 {
+      color: #fff;
+    }
+
+    p,
+    li,
+    td,
+    th {
+      font-size: clamp(19px, 2.1vw, 30px);
+      line-height: 1.35;
+    }
+
+    p {
+      max-width: 1040px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .title-slide p {
+      color: #e9fbf7;
+      font-size: clamp(24px, 2.7vw, 38px);
+    }
+
+    ul,
+    ol {
+      max-width: 1100px;
+      margin: 0;
+      padding-left: 1.25em;
+    }
+
+    li + li {
+      margin-top: 12px;
+    }
+
+    strong {
+      color: var(--text);
+    }
+
+    code {
+      padding: 0.08em 0.25em;
+      border-radius: 4px;
+      background: #eef2f7;
+      color: #1f2937;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.82em;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+      width: min(1180px, 100%);
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      background: #fbfcfe;
+    }
+
+    .panel h3 {
+      margin: 0 0 14px;
+      color: var(--text);
+      font-size: clamp(22px, 2.3vw, 34px);
+    }
+
+    .panel ul {
+      padding-left: 1.1em;
+    }
+
+    table {
+      width: min(1160px, 100%);
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    th,
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text);
+      background: #eef7f5;
+      font-weight: 700;
+    }
+
+    .status-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      width: min(1000px, 100%);
+    }
+
+    .status {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: #fbfcfe;
+      font-size: clamp(19px, 2vw, 28px);
+      font-weight: 700;
+    }
+
+    .status::before {
+      content: "";
+      display: inline-block;
+      width: 0.8em;
+      height: 0.8em;
+      margin-right: 0.45em;
+      border-radius: 50%;
+      vertical-align: -0.02em;
+    }
+
+    .status.red::before {
+      background: var(--danger);
+    }
+
+    .status.yellow::before {
+      background: var(--accent);
+    }
+
+    .status.green::before {
+      background: var(--ok);
+    }
+
+    .controls {
+      position: fixed;
+      right: 22px;
+      bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    button {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    @media (max-width: 760px) {
+      body {
+        overflow: auto;
+      }
+
+      main {
+        height: auto;
+      }
+
+      .slide,
+      .slide.active {
+        min-height: 100vh;
+        height: auto;
+        padding: 58px 24px 92px;
+      }
+
+      .columns,
+      .status-list {
+        grid-template-columns: 1fr;
+      }
+
+      table,
+      tbody,
+      tr,
+      td,
+      th {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        border-bottom: 1px solid var(--line);
+      }
+
+      td {
+        border: 0;
+      }
+
+      td:first-child {
+        font-weight: 700;
+        color: var(--primary);
+        padding-bottom: 0;
+      }
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: #fff;
+      }
+
+      main {
+        height: auto;
+      }
+
+      .slide,
+      .slide.active {
+        display: flex;
+        height: 100vh;
+        page-break-after: always;
+      }
+
+      .controls {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="slide title-slide active">
+      <div class="kicker">Projeto IoT</div>
+      <h1>Home Office IoT</h1>
+      <p>Automação residencial com ESP32, MQTT, Mosquitto e Home Assistant.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Problema</h2>
+      <p>Em um home office, várias ações simples ainda dependem de presença física ou de controles separados.</p>
+      <ul>
+        <li>Indicar se o usuário está em reunião, em foco ou disponível.</li>
+        <li>Ligar ou religar um home server.</li>
+        <li>Controlar fechadura e portão/interfone.</li>
+        <li>Monitorar riscos de temperatura na cozinha.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Solução Proposta</h2>
+      <p>A solução centraliza sensores, atuadores e comandos em uma automação conectada por WiFi e MQTT.</p>
+      <ul>
+        <li>O ESP32 executa o controle físico do ambiente.</li>
+        <li>O Mosquitto distribui mensagens MQTT entre os serviços.</li>
+        <li>O Home Assistant oferece o painel web de controle e monitoramento.</li>
+        <li>O Wokwi permite validar o circuito em simulação.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Arquitetura</h2>
+      <ol>
+        <li>O Home Assistant publica comandos MQTT.</li>
+        <li>O broker Mosquitto recebe e distribui as mensagens.</li>
+        <li>O ESP32 assina os tópicos de comando.</li>
+        <li>O firmware aciona LEDs, relés e servo motor.</li>
+        <li>Estados e leituras são publicados de volta para o painel.</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <h2>Equipamentos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Equipamento</th>
+            <th>Função no projeto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ESP32 DevKit V1</td>
+            <td>Controlador central da automação, com WiFi integrado.</td>
+          </tr>
+          <tr>
+            <td>Fita NeoPixel WS2812B</td>
+            <td>Letreiro visual do escritório.</td>
+          </tr>
+          <tr>
+            <td>Relés</td>
+            <td>Acionam o home server e o portão/interfone por pulsos temporizados.</td>
+          </tr>
+          <tr>
+            <td>Servo SG90</td>
+            <td>Representa a fechadura eletrônica.</td>
+          </tr>
+          <tr>
+            <td>DHT22 e botão</td>
+            <td>Medem temperatura e detectam o toque do interfone.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <h2>Funções Automatizadas</h2>
+      <div class="status-list">
+        <div class="status red">Reunião</div>
+        <div class="status yellow">Foco</div>
+        <div class="status green">Livre</div>
+      </div>
+      <div class="columns">
+        <div class="panel">
+          <h3>Controle</h3>
+          <ul>
+            <li>Travar ou destravar a fechadura.</li>
+            <li>Abrir o portão do interfone.</li>
+            <li>Gerar pulso no botão power do home server.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Monitoramento</h3>
+          <ul>
+            <li>Ler temperatura a cada 5 segundos.</li>
+            <li>Alertar acima de 60 °C.</li>
+            <li>Publicar evento de interfone tocando.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Código Desenvolvido</h2>
+      <p>O firmware foi desenvolvido em C++ com o framework Arduino para ESP32.</p>
+      <ul>
+        <li><code>WiFi</code>: conexão do ESP32 à rede.</li>
+        <li><code>PubSubClient</code>: comunicação MQTT.</li>
+        <li><code>Adafruit_NeoPixel</code>: controle da fita de LEDs.</li>
+        <li><code>DHT</code>: leitura do sensor de temperatura.</li>
+        <li><code>ESP32Servo</code>: controle da fechadura por servo motor.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Lógica do Firmware</h2>
+      <p>O loop principal evita bloqueios usando <code>millis()</code> em vez de <code>delay()</code>.</p>
+      <ul>
+        <li>Reconecta WiFi e MQTT automaticamente.</li>
+        <li>Lê o DHT22 em intervalo fixo.</li>
+        <li>Controla pulsos dos relés por tempo.</li>
+        <li>Faz debounce do botão do interfone.</li>
+        <li>Publica estados retidos para o Home Assistant.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Tópicos MQTT</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tópico</th>
+            <th>Finalidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>home/escritorio/status/cmd</code></td>
+            <td>Comanda o letreiro de reunião.</td>
+          </tr>
+          <tr>
+            <td><code>home/server/power/cmd</code></td>
+            <td>Aciona o pulso de power do home server.</td>
+          </tr>
+          <tr>
+            <td><code>home/seguranca/porta/cmd</code></td>
+            <td>Trava ou destrava a fechadura.</td>
+          </tr>
+          <tr>
+            <td><code>home/cozinha/fogao/temperatura</code></td>
+            <td>Publica a temperatura medida pelo DHT22.</td>
+          </tr>
+          <tr>
+            <td><code>home/interfone/status</code></td>
+            <td>Informa quando o interfone está tocando.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <h2>Conclusão</h2>
+      <p>A solução integra sensores, atuadores e uma interface web em uma arquitetura simples de IoT.</p>
+      <p>O MQTT mantém os componentes desacoplados, o ESP32 atua no controle físico e o Home Assistant centraliza a operação para o usuário.</p>
+    </section>
+  </main>
+
+  <div class="controls" aria-label="Controles da apresentação">
+    <button type="button" id="prev" aria-label="Slide anterior">‹</button>
+    <span id="counter">1 / 10</span>
+    <button type="button" id="next" aria-label="Próximo slide">›</button>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.querySelector("#counter");
+    const prevButton = document.querySelector("#prev");
+    const nextButton = document.querySelector("#next");
+    let current = 0;
+
+    function showSlide(index) {
+      current = Math.max(0, Math.min(index, slides.length - 1));
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("active", slideIndex === current);
+      });
+      counter.textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    prevButton.addEventListener("click", () => showSlide(current - 1));
+    nextButton.addEventListener("click", () => showSlide(current + 1));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        showSlide(current + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        showSlide(current - 1);
+      }
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>

@@ -7,8 +7,9 @@ services:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - ./mosquitto/config:/mosquitto/config
-      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/config:/mosquitto/config:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
     networks:
       - iot-net
 
@@ -17,7 +18,7 @@ services:
     container_name: iot-homeassistant
     restart: unless-stopped
     ports:
-      - "8123:8123"
+      - "${HA_PORT:-8124}:8123"
     volumes:
       - ./homeassistant/config:/config
       - /etc/localtime:/etc/localtime:ro
@@ -29,3 +30,7 @@ services:
 networks:
   iot-net:
     driver: bridge
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:
