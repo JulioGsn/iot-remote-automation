@@ -6,7 +6,8 @@ Automação residencial com ESP32, Mosquitto MQTT e Home Assistant.
 
 - `src/main.cpp` — firmware ESP32 (5 automações: letreiro, home server, fechadura, temperatura, interfone)
 - `diagram.json` — simulação Wokwi com labels visuais
-- `docker-compose.yml` — Mosquitto + Home Assistant
+- `docker-compose.yml` — Mosquitto + Home Assistant + telemetria simulada do Home Server
+- `scripts/home-server-telemetry.sh` — publica CPU, RAM, temperatura e processos via MQTT para demonstração
 
 ## Como usar
 
@@ -39,6 +40,7 @@ rodando em `localhost`/Docker na sua máquina.
 docker compose ps
 docker compose exec mosquitto mosquitto_pub -h localhost -r -t test -m ping
 docker compose exec mosquitto mosquitto_sub -h localhost -t test -C 1
+docker compose exec mosquitto mosquitto_sub -h localhost -t 'home/server/#' -C 6 -v
 ```
 
 Compilar firmware:

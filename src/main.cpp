@@ -60,6 +60,7 @@ static const char T_INTERFONE_ABRIR[]   = "home/interfone/abrir";
 #define RELE2_PULSO_MS      3000
 #define BOTAO_DEBOUNCE_MS   50
 #define LED_BLINK_MS        500
+#define INTERFONE_TOQUE_MS  8000
 
 // ============================================================================
 // OBJETOS GLOBAIS
@@ -99,6 +100,8 @@ const unsigned long WIFI_RETRY_MS = 10000;
 bool   lastButtonRaw = HIGH;
 unsigned long lastButtonChangeMs = 0;
 bool   botaoFoiPublicado = false;
+bool   interfoneTocando = false;
+unsigned long interfoneStartMs = 0;
 
 // Servo
 int   currentServoPos = SERVO_TRANCADO;
@@ -122,11 +125,14 @@ void lerDHT22();
 void checarRele1();
 void checarRele2();
 void checarBotao();
+void atualizarInterfone();
 void atualizarServo();
 void aplicarStatusEscritorio(const String& status, bool publishState);
 void publicarEstadosIniciais();
 void publicarEstadoFechadura();
 void publicarEstadoServidor(const char* estado);
+void iniciarToqueInterfone();
+void encerrarToqueInterfone();
 
 // ============================================================================
 // SETUP
@@ -221,10 +227,13 @@ void loop() {
     // 7. Ler botao do interfone (com debounce)
     checarBotao();
 
-    // 8. Atualizar servo se necessario
+    // 8. Atualizar estado temporizado do interfone
+    atualizarInterfone();
+
+    // 9. Atualizar servo se necessario
     atualizarServo();
 
-    // 9. Atualizar NeoPixel se necessario
+    // 10. Atualizar NeoPixel se necessario
     if (neoPixelChanged) {
         neoPixel.fill(neoPixelTargetColor);
         neoPixel.show();
@@ -316,6 +325,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
             rele2Active = true;
             rele2StartMs = millis();
             digitalWrite(PIN_RELE_2, HIGH);
+            encerrarToqueInterfone();
             Serial.println("[Rele2] Portao ABRIR");
         }
     }
@@ -391,7 +401,7 @@ void publicarEstadosIniciais() {
     publicarEstadoServidor(rele1Active ? "ON" : "OFF");
     publicarEstadoFechadura();
     mqtt.publish(T_ALERTA, "NORMAL", true);
-    mqtt.publish(T_INTERFONE, "SILENCIO", true);
+    mqtt.publish(T_INTERFONE, interfoneTocando ? "TOCANDO" : "SILENCIO", true);
 }
 
 // ============================================================================
@@ -472,19 +482,43 @@ void checarBotao() {
     bool botaoPressionado = (raw == LOW) && ((now - lastButtonChangeMs) >= BOTAO_DEBOUNCE_MS);
 
     if (botaoPressionado && !botaoFoiPublicado) {
-        if (wifiConnected && mqtt.connected()) {
-            mqtt.publish(T_INTERFONE, "TOCANDO", true);
-        }
-        Serial.println("[Interfone] TOCANDO!");
+        iniciarToqueInterfone();
         botaoFoiPublicado = true;
     }
 
-    // Reseta flag quando o botao for solto
+    // Permite detectar um novo toque quando o botao for solto.
     if (raw == HIGH && botaoFoiPublicado) {
-        if (wifiConnected && mqtt.connected()) {
-            mqtt.publish(T_INTERFONE, "SILENCIO", true);
-        }
         botaoFoiPublicado = false;
+    }
+}
+
+void iniciarToqueInterfone() {
+    interfoneTocando = true;
+    interfoneStartMs = millis();
+
+    if (wifiConnected && mqtt.connected()) {
+        mqtt.publish(T_INTERFONE, "TOCANDO", true);
+    }
+
+    Serial.println("[Interfone] TOCANDO!");
+}
+
+void encerrarToqueInterfone() {
+    if (!interfoneTocando) return;
+
+    interfoneTocando = false;
+    if (wifiConnected && mqtt.connected()) {
+        mqtt.publish(T_INTERFONE, "SILENCIO", true);
+    }
+
+    Serial.println("[Interfone] SILENCIO");
+}
+
+void atualizarInterfone() {
+    if (!interfoneTocando) return;
+
+    if (millis() - interfoneStartMs >= INTERFONE_TOQUE_MS) {
+        encerrarToqueInterfone();
     }
 }
 

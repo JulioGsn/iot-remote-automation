@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Home Office IoT - Apresentação</title>
+  <title>Home Focus - IoT</title>
   <style>
     :root {
       color-scheme: light;
@@ -13,6 +13,9 @@
       --muted: #5b6678;
       --line: #d9e0ea;
       --primary: #0f766e;
+      --primary-dark: #1f2937;
+      --primary-soft: #d5f5ef;
+      --primary-faint: #eef7f5;
       --accent: #b45309;
       --danger: #b91c1c;
       --ok: #15803d;
@@ -55,12 +58,12 @@
     .title-slide {
       background:
         linear-gradient(90deg, rgba(15, 118, 110, 0.95), rgba(31, 41, 55, 0.88)),
-        linear-gradient(135deg, #0f766e, #1f2937);
+        linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: #fff;
     }
 
     .title-slide .kicker {
-      color: #d5f5ef;
+      color: var(--primary-soft);
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -104,6 +107,12 @@
     .title-slide p {
       color: #e9fbf7;
       font-size: clamp(24px, 2.7vw, 38px);
+    }
+
+    .cover-name {
+      color: #d5f5ef;
+      font-size: clamp(20px, 2.1vw, 30px);
+      font-weight: 700;
     }
 
     ul,
@@ -171,8 +180,82 @@
 
     th {
       color: var(--text);
-      background: #eef7f5;
+      background: var(--primary-faint);
       font-weight: 700;
+    }
+
+    .architecture-flow {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr) 54px minmax(0, 1fr) 54px minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
+      width: min(1120px, 100%);
+    }
+
+    .arch-node {
+      min-height: 188px;
+      border: 1px solid #b9e5dd;
+      border-radius: 8px;
+      padding: 18px;
+      background: #f7fcfb;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .arch-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .arch-icon svg {
+      width: 34px;
+      height: 34px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .arch-node strong {
+      color: var(--text);
+      font-size: 24px;
+      line-height: 1.12;
+    }
+
+    .arch-node span {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.28;
+    }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 42px;
+      font-weight: 700;
+    }
+
+    .arch-feedback {
+      width: min(1120px, 100%);
+      border-left: 5px solid var(--primary);
+      border-radius: 8px;
+      padding: 14px 18px;
+      background: var(--primary-faint);
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1.32;
     }
 
     .status-list {
@@ -257,8 +340,18 @@
       }
 
       .columns,
-      .status-list {
+      .status-list,
+      .architecture-flow {
         grid-template-columns: 1fr;
+      }
+
+      .arch-node {
+        min-height: auto;
+      }
+
+      .arch-arrow {
+        height: 22px;
+        transform: rotate(90deg);
       }
 
       table,
@@ -315,13 +408,14 @@
   <main>
     <section class="slide title-slide active">
       <div class="kicker">Projeto IoT</div>
-      <h1>Home Office IoT</h1>
-      <p>Automação residencial com ESP32, MQTT, Mosquitto e Home Assistant.</p>
+      <h1>Home Focus</h1>
+      <p>Serviço de automação residencial para ajudar o dev remoto a manter foco, conforto e controle no ambiente de trabalho.</p>
+      <p class="cover-name">Júlio Gomes da Silva Neto</p>
     </section>
 
     <section class="slide">
       <h2>Problema</h2>
-      <p>Em um home office, várias ações simples ainda dependem de presença física ou de controles separados.</p>
+      <p>Para um dev remoto, pequenos atritos da casa podem quebrar o foco durante o trabalho.</p>
       <ul>
         <li>Indicar se o usuário está em reunião, em foco ou disponível.</li>
         <li>Ligar ou religar um home server.</li>
@@ -332,7 +426,7 @@
 
     <section class="slide">
       <h2>Solução Proposta</h2>
-      <p>A solução centraliza sensores, atuadores e comandos em uma automação conectada por WiFi e MQTT.</p>
+      <p>O Home Focus centraliza sensores, atuadores e comandos em uma casa mais inteligente, com foco no fluxo de trabalho remoto.</p>
       <ul>
         <li>O ESP32 executa o controle físico do ambiente.</li>
         <li>O Mosquitto distribui mensagens MQTT entre os serviços.</li>
@@ -343,13 +437,54 @@
 
     <section class="slide">
       <h2>Arquitetura</h2>
-      <ol>
-        <li>O Home Assistant publica comandos MQTT.</li>
-        <li>O broker Mosquitto recebe e distribui as mensagens.</li>
-        <li>O ESP32 assina os tópicos de comando.</li>
-        <li>O firmware aciona LEDs, relés e servo motor.</li>
-        <li>Estados e leituras são publicados de volta para o painel.</li>
-      </ol>
+      <p>O MQTT funciona como canal central entre o painel, o broker, o ESP32 e os dispositivos físicos.</p>
+      <div class="architecture-flow" aria-label="Fluxo da arquitetura do Home Focus">
+        <div class="arch-node">
+          <div class="arch-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <rect x="8" y="10" width="32" height="24" rx="3"></rect>
+              <path d="M14 18h8M14 25h20M18 40h12M24 34v6"></path>
+            </svg>
+          </div>
+          <strong>Home Assistant</strong>
+          <span>Painel web para comandos, estados e alertas.</span>
+        </div>
+        <div class="arch-arrow" aria-hidden="true">&rarr;</div>
+        <div class="arch-node">
+          <div class="arch-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <rect x="10" y="13" width="28" height="22" rx="4"></rect>
+              <path d="M16 20h16M16 27h10M34 19v10"></path>
+            </svg>
+          </div>
+          <strong>Mosquitto MQTT</strong>
+          <span>Broker que recebe, distribui e desacopla mensagens.</span>
+        </div>
+        <div class="arch-arrow" aria-hidden="true">&rarr;</div>
+        <div class="arch-node">
+          <div class="arch-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <rect x="14" y="12" width="20" height="24" rx="3"></rect>
+              <path d="M9 18h5M9 24h5M9 30h5M34 18h5M34 24h5M34 30h5M20 20h8M20 28h8"></path>
+            </svg>
+          </div>
+          <strong>ESP32</strong>
+          <span>Firmware assina tópicos, lê sensores e aciona atuadores.</span>
+        </div>
+        <div class="arch-arrow" aria-hidden="true">&rarr;</div>
+        <div class="arch-node">
+          <div class="arch-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <path d="M8 24l16-13 16 13"></path>
+              <path d="M13 22v16h22V22"></path>
+              <path d="M20 38V27h8v11"></path>
+            </svg>
+          </div>
+          <strong>Ambiente físico</strong>
+          <span>LEDs, relés, servo, DHT22 e botão do interfone.</span>
+        </div>
+      </div>
+      <div class="arch-feedback">Estados e leituras voltam pelo broker MQTT para o painel, mantendo a automação visível e controlável.</div>
     </section>
 
     <section class="slide">
@@ -473,7 +608,7 @@
 
     <section class="slide">
       <h2>Conclusão</h2>
-      <p>A solução integra sensores, atuadores e uma interface web em uma arquitetura simples de IoT.</p>
+      <p>O Home Focus integra sensores, atuadores e uma interface web em uma arquitetura simples de IoT.</p>
       <p>O MQTT mantém os componentes desacoplados, o ESP32 atua no controle físico e o Home Assistant centraliza a operação para o usuário.</p>
     </section>
   </main>

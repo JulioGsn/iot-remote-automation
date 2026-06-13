@@ -192,6 +192,12 @@ Após cada movimento, publica o estado atual no tópico `home/seguranca/porta/st
 | `home/escritorio/status` | publish | ESP32 | Estado atual do letreiro |
 | `home/server/power/cmd` | subscribe | App/sistema externo | Ligar Home Server (pulso relé) |
 | `home/server/power/state` | publish | ESP32 | Estado do pulso do Home Server (ON/OFF) |
+| `home/server/status` | publish | Simulador Docker | Status online/offline do Home Server |
+| `home/server/telemetry/temperature` | publish | Simulador Docker | Temperatura do Home Server |
+| `home/server/telemetry/cpu` | publish | Simulador Docker | Uso de CPU em % |
+| `home/server/telemetry/memory` | publish | Simulador Docker | Uso de RAM em % |
+| `home/server/telemetry/processes` | publish | Simulador Docker | Quantidade de processos rodando |
+| `home/server/telemetry/top_processes` | publish | Simulador Docker | Lista resumida de processos principais |
 | `home/seguranca/porta/cmd` | subscribe | App/sistema externo | Trancar/destrancar fechadura |
 | `home/interfone/abrir` | subscribe | App/sistema externo | Abrir portão do interfone |
 | `home/cozinha/fogao/temperatura` | publish | ESP32 | Leitura do DHT22 |

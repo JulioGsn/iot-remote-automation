@@ -15,6 +15,15 @@
       Acessar http://localhost:8124 — deve carregar o onboarding ou o dashboard.
       Se quiser usar a porta padrão e ela estiver livre: `HA_PORT=8123 docker compose up -d`.
 
+- [ ] **Telemetria do Home Server rodando**
+      `docker compose ps` → `iot-home-server-telemetry` deve estar `Up`.
+      Teste:
+      ```bash
+      docker compose exec mosquitto mosquitto_sub \
+        -h localhost -t "home/server/#" -C 6 -v
+      ```
+      Deve mostrar `home/server/status ONLINE`, CPU, RAM, temperatura e processos.
+
 - [ ] **Home Assistant: integração MQTT configurada**
       Settings → Devices & Services → deve aparecer "MQTT" como integração.
       A entrada já vem pré-configurada em `homeassistant/config/.storage/core.config_entries`.
@@ -95,7 +104,7 @@ Testar cada tópico que o ESP32 escuta. Publicar do terminal e verificar:
       ```
       NeoPixel deve acender VERDE.
 
-- [ ] **Home Server Power**
+- [ ] **Pulso Power Home Server**
       ```bash
       docker compose exec mosquitto mosquitto_pub \
         -h localhost -t "home/server/power/cmd" -m "LIGAR"
@@ -134,7 +143,7 @@ Testar cada tópico que o ESP32 escuta. Publicar do terminal e verificar:
       Clicar no botão no simulador Wokwi.
       Serial Monitor deve mostrar `[Interfone] TOCANDO!`
       Tópico `home/interfone/status` deve receber "TOCANDO".
-      Ao soltar o botão, o tópico deve receber "SILENCIO".
+      O estado fica "TOCANDO" por ~8s, ou volta para "SILENCIO" imediatamente quando o portão é aberto.
 
 ---
 
@@ -145,8 +154,16 @@ Após subir o Home Assistant com a integração MQTT pré-configurada, verificar
 - [ ] **select.letreiro_reuniao** aparece em Settings → Devices & Services → MQTT
       Mudar o valor para "reuniao" → NeoPixel deve ficar vermelho no simulador.
 
-- [ ] **switch.home_server_power** aparece
-      Ligar → Relé 1 deve ativar por 1s.
+- [ ] **button.pulso_power_home_server** aparece
+      Pressionar → Relé 1 deve ativar por 1s.
+
+- [ ] **Sensores do Home Server aparecem**
+      - `binary_sensor.home_server_online`
+      - `sensor.home_server_temperatura`
+      - `sensor.home_server_cpu`
+      - `sensor.home_server_ram`
+      - `sensor.home_server_processos`
+      - `sensor.home_server_processos_principais`
 
 - [ ] **lock.fechadura_porta** aparece
       Destrancar → Servo deve girar 90°.
@@ -154,6 +171,7 @@ Após subir o Home Assistant com a integração MQTT pré-configurada, verificar
 
 - [ ] **button.abrir_portao_interfone** aparece
       Pressionar → Relé 2 deve ativar por 3s.
+      Se o interfone estiver tocando, o status deve voltar para "SILENCIO".
 
 - [ ] **sensor.temperatura_fogao** aparece
       Deve mostrar valor numérico com "°C".
@@ -172,11 +190,13 @@ Se as entidades aparecerem como **"unknown"** ou **"unavailable"**:
 
 ## 6. Dashboard Lovelace
 
-- [ ] **Abas visíveis**: Escritório, Segurança, Cozinha.
+- [ ] **Abas visíveis**: Escritório, Home Server, Segurança, Cozinha.
 - [ ] **Card Letreiro Reunião** — select com opções livre/foco/reuniao.
-- [ ] **Card Home Server** — toggle switch.
+- [ ] **Card Pulso Power Home Server** — botão de pressão.
+- [ ] **Aba Home Server** — status online, botão power, gauges de temperatura/CPU/RAM e processos.
 - [ ] **Card Fechadura** — lock com comando travar/destrancar.
 - [ ] **Card Portão Interfone** — botão de pressão.
+- [ ] **Alerta Interfone Tocando** — aparece na aba Segurança quando `binary_sensor.interfone_tocando` está ON.
 - [ ] **Card Temperatura** — sensor numérico.
 - [ ] **Card Alerta Temperatura** — binary sensor (on/off).
 - [ ] **Card Interfone Status** — binary sensor.

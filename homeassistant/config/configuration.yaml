@@ -20,6 +20,38 @@ mqtt:
       device_class: temperature
       state_class: measurement
 
+    - name: "Home Server Temperatura"
+      unique_id: home_office_home_server_temperatura
+      state_topic: "home/server/telemetry/temperature"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+
+    - name: "Home Server CPU"
+      unique_id: home_office_home_server_cpu
+      state_topic: "home/server/telemetry/cpu"
+      unit_of_measurement: "%"
+      state_class: measurement
+      icon: "mdi:cpu-64-bit"
+
+    - name: "Home Server RAM"
+      unique_id: home_office_home_server_ram
+      state_topic: "home/server/telemetry/memory"
+      unit_of_measurement: "%"
+      state_class: measurement
+      icon: "mdi:memory"
+
+    - name: "Home Server Processos"
+      unique_id: home_office_home_server_processos
+      state_topic: "home/server/telemetry/processes"
+      state_class: measurement
+      icon: "mdi:application-cog"
+
+    - name: "Home Server Processos Principais"
+      unique_id: home_office_home_server_processos_principais
+      state_topic: "home/server/telemetry/top_processes"
+      icon: "mdi:format-list-bulleted"
+
   binary_sensor:
     - name: "Alerta Temperatura"
       unique_id: home_office_alerta_temperatura
@@ -28,23 +60,19 @@ mqtt:
       payload_off: "NORMAL"
       device_class: heat
 
+    - name: "Home Server Online"
+      unique_id: home_office_home_server_online
+      state_topic: "home/server/status"
+      payload_on: "ONLINE"
+      payload_off: "OFFLINE"
+      device_class: connectivity
+
     - name: "Interfone Tocando"
       unique_id: home_office_interfone_tocando
       state_topic: "home/interfone/status"
       payload_on: "TOCANDO"
       payload_off: "SILENCIO"
       device_class: sound
-
-  switch:
-    - name: "Home Server Power"
-      unique_id: home_office_home_server_power
-      command_topic: "home/server/power/cmd"
-      state_topic: "home/server/power/state"
-      payload_on: "LIGAR"
-      payload_off: "DESLIGAR"
-      state_on: "ON"
-      state_off: "OFF"
-      icon: "mdi:server"
 
   lock:
     - name: "Fechadura Porta"
@@ -57,6 +85,12 @@ mqtt:
       state_unlocked: "DESTRANCADO"
 
   button:
+    - name: "Pulso Power Home Server"
+      unique_id: home_office_pulso_power_home_server
+      command_topic: "home/server/power/cmd"
+      payload_press: "LIGAR"
+      icon: "mdi:power"
+
     - name: "Abrir Portao Interfone"
       unique_id: home_office_abrir_portao_interfone
       command_topic: "home/interfone/abrir"
@@ -75,4 +109,11 @@ mqtt:
         - "reuniao"
 
 lovelace:
-  mode: yaml
+  resource_mode: yaml
+  dashboards:
+    lovelace:
+      mode: yaml
+      filename: ui-lovelace.yaml
+      title: Remoto
+      icon: mdi:remote
+      show_in_sidebar: true

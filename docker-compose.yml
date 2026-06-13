@@ -27,6 +27,22 @@ services:
     depends_on:
       - mosquitto
 
+  home-server-telemetry:
+    image: eclipse-mosquitto:2
+    container_name: iot-home-server-telemetry
+    restart: unless-stopped
+    command: ["/bin/sh", "/scripts/home-server-telemetry.sh"]
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      INTERVAL: 5
+    volumes:
+      - ./scripts/home-server-telemetry.sh:/scripts/home-server-telemetry.sh:ro
+    networks:
+      - iot-net
+    depends_on:
+      - mosquitto
+
 networks:
   iot-net:
     driver: bridge

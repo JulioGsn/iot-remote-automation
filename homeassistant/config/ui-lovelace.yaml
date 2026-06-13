@@ -1,4 +1,4 @@
-title: Home Office IoT
+title: Remoto
 views:
   - title: Escritório
     icon: mdi:desk
@@ -7,28 +7,111 @@ views:
         entity: select.letreiro_reuniao
         name: Letreiro Reunião
       - type: entity
-        entity: switch.home_server_power
-        name: Home Server
+        entity: button.pulso_power_home_server
+        name: Pulso Power Home Server
+
+  - title: Home Server
+    icon: mdi:server
+    cards:
+      - type: entity
+        entity: binary_sensor.home_server_online
+        name: Status Home Server
+        state_color: true
+
+      - type: entity
+        entity: button.pulso_power_home_server
+        name: Pulso Power
+
+      - type: gauge
+        entity: sensor.home_server_temperatura
+        name: Temperatura
+        min: 0
+        max: 100
+        severity:
+          green: 0
+          yellow: 55
+          red: 75
+
+      - type: gauge
+        entity: sensor.home_server_cpu
+        name: CPU
+        min: 0
+        max: 100
+        severity:
+          green: 0
+          yellow: 65
+          red: 85
+
+      - type: gauge
+        entity: sensor.home_server_ram
+        name: Memória RAM
+        min: 0
+        max: 100
+        severity:
+          green: 0
+          yellow: 70
+          red: 90
+
+      - type: entities
+        title: Processos
+        entities:
+          - entity: sensor.home_server_processos
+            name: Processos rodando
+          - entity: sensor.home_server_processos_principais
+            name: Principais processos
 
   - title: Segurança
     icon: mdi:shield-lock
     cards:
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: binary_sensor.interfone_tocando
+            state: "on"
+        card:
+          type: markdown
+          title: INTERFONE TOCANDO
+          content: |
+            ## Alguem esta no portao
+            Verifique o interfone e use **Abrir Portao** se for liberar a entrada.
+
       - type: entity
         entity: lock.fechadura_porta
         name: Fechadura Porta
       - type: entity
         entity: button.abrir_portao_interfone
-        name: Portão Interfone
+        name: Abrir Portão
       - type: entity
         entity: binary_sensor.interfone_tocando
         name: Interfone Status
+        state_color: true
 
   - title: Cozinha
     icon: mdi:stove
     cards:
-      - type: entity
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: binary_sensor.alerta_temperatura
+            state: "on"
+        card:
+          type: markdown
+          title: ALERTA DE TEMPERATURA
+          content: |
+            ## Fogao em temperatura critica
+            Verifique a cozinha imediatamente.
+
+      - type: gauge
         entity: sensor.temperatura_fogao
         name: Temperatura Fogão
+        min: 0
+        max: 100
+        severity:
+          green: 0
+          yellow: 45
+          red: 60
+
       - type: entity
         entity: binary_sensor.alerta_temperatura
         name: Alerta Temperatura
+        state_color: true
