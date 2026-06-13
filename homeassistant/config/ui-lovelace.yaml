@@ -1,0 +1,34 @@
+title: Home Office IoT
+views:
+  - title: Escritório
+    icon: mdi:desk
+    cards:
+      - type: entity
+        entity: select.letreiro_reuniao
+        name: Letreiro Reunião
+      - type: entity
+        entity: switch.home_server_power
+        name: Home Server
+
+  - title: Segurança
+    icon: mdi:shield-lock
+    cards:
+      - type: entity
+        entity: lock.fechadura_porta
+        name: Fechadura Porta
+      - type: entity
+        entity: button.abrir_portao_interfone
+        name: Portão Interfone
+      - type: entity
+        entity: binary_sensor.interfone_tocando
+        name: Interfone Status
+
+  - title: Cozinha
+    icon: mdi:stove
+    cards:
+      - type: entity
+        entity: sensor.temperatura_fogao
+        name: Temperatura Fogão
+      - type: entity
+        entity: binary_sensor.alerta_temperatura
+        name: Alerta Temperatura

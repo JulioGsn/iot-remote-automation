@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "author": "Home Office IoT",
+  "editor": "wokwi",
+  "serialMonitor": {
+    "display_errors": true,
+    "baud": 115200
+  },
+  "parts": [
+    {
+      "type": "wokwi-text",
+      "id": "titulo_escritorio",
+      "top": -175,
+      "left": 100,
+      "attrs": { "text": "=== ESCRITORIO ===" }
+    },
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": -130,
+      "left": -10,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_esp",
+      "top": -70,
+      "left": 130,
+      "attrs": { "text": "ESP32 (Central)" }
+    },
+    {
+      "type": "wokwi-neopixel",
+      "id": "neo1",
+      "top": -130,
+      "left": 360,
+      "attrs": { "pixels": "8" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_neo",
+      "top": -85,
+      "left": 360,
+      "attrs": { "text": "Letreiro Reuniao (8 LED RGB)" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_neo_sub",
+      "top": -70,
+      "left": 360,
+      "attrs": { "text": "Verm=reuniao  Amar=foco  Verde=livre" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledRelay1",
+      "top": -70,
+      "left": 160,
+      "attrs": { "color": "red", "label": "Home Server" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "titulo_seguranca",
+      "top": -15,
+      "left": 105,
+      "attrs": { "text": "=== SEGURANCA ===" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 40,
+      "left": 360,
+      "attrs": { "pullup": "1" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_btn",
+      "top": 85,
+      "left": 360,
+      "attrs": { "text": "Botao Interfone" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_btn_sub",
+      "top": 100,
+      "left": 360,
+      "attrs": { "text": "-> publica TOCANDO no MQTT" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledRelay2",
+      "top": 40,
+      "left": 160,
+      "attrs": { "color": "blue", "label": "Portao" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_rele2",
+      "top": 75,
+      "left": 160,
+      "attrs": { "text": "Rele 2 - Portao (pulso 3s)" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo1",
+      "top": 30,
+      "left": -260,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_servo",
+      "top": 120,
+      "left": -260,
+      "attrs": { "text": "Servo - Fechadura Eletronica" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_servo_sub",
+      "top": 135,
+      "left": -260,
+      "attrs": { "text": "TRAVAR=0  |  DESTRANCAR=90" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "titulo_cozinha",
+      "top": 180,
+      "left": -260,
+      "attrs": { "text": "=== COZINHA ===" }
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": 210,
+      "left": -260,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_dht",
+      "top": 248,
+      "left": -260,
+      "attrs": { "text": "DHT22 - Temperatura Fogao" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "lbl_dht_sub",
+      "top": 263,
+      "left": -260,
+      "attrs": { "text": "Alerta se temperatura > 60C" }
+    }
+  ],
+  "connections": [
+    ["esp:GND.1", "neo1:GND", "black", ["vrouter"]],
+    ["esp:19", "neo1:DIN", "green", ["vrouter"]],
+    ["esp:3V3", "neo1:VCC", "red", ["vrouter"]],
+    ["esp:GND.1", "servo1:GND", "black", ["vrouter"]],
+    ["esp:5", "servo1:PWM", "orange", ["vrouter"]],
+    ["esp:3V3", "servo1:VCC", "red", ["vrouter"]],
+    ["esp:GND.1", "dht1:GND", "black", ["vrouter"]],
+    ["esp:23", "dht1:SDA", "yellow", ["vrouter"]],
+    ["esp:3V3", "dht1:VCC", "red", ["vrouter"]],
+    ["esp:GND.1", "btn1:GND.1", "black", ["vrouter"]],
+    ["esp:34", "btn1:IN", "purple", ["vrouter"]],
+    ["esp:3V3", "btn1:VCC", "red", ["vrouter"]],
+    ["esp:GND.1", "ledRelay1:C", "black", ["vrouter"]],
+    ["esp:18", "ledRelay1:A", "orange", ["vrouter"]],
+    ["esp:GND.1", "ledRelay2:C", "black", ["vrouter"]],
+    ["esp:12", "ledRelay2:A", "brown", ["vrouter"]]
+  ]
+}

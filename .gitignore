@@ -1,0 +1,25 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# VS Code (keep extensions/launch/settings for the project)
+.vscode/*.log
+.vscode/*.swp
+
+# Mosquitto
+mosquitto/data/
+mosquitto/config/mosquitto.passwd
+
+# Home Assistant runtime (keep our manual configs)
+homeassistant/config/*
+!homeassistant/config/configuration.yaml
+!homeassistant/config/ui-lovelace.yaml
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db

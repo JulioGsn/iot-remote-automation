@@ -1,0 +1,65 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# ===== MQTT Integration =====
+mqtt:
+  sensor:
+    - name: "Temperatura Fogao"
+      state_topic: "home/cozinha/fogao/temperatura"
+      unit_of_measurement: "°C"
+      device_class: temperature
+
+  binary_sensor:
+    - name: "Alerta Temperatura"
+      state_topic: "home/cozinha/fogao/alerta"
+      payload_on: "CRITICO"
+      payload_off: "NORMAL"
+      device_class: heat
+
+    - name: "Interfone Tocando"
+      state_topic: "home/interfone/status"
+      payload_on: "TOCANDO"
+      payload_off: "SILENCIO"
+      device_class: sound
+
+  switch:
+    - name: "Home Server Power"
+      command_topic: "home/server/power/cmd"
+      payload_on: "LIGAR"
+      payload_off: "DESLIGAR"
+      icon: "mdi:server"
+
+  lock:
+    - name: "Fechadura Porta"
+      command_topic: "home/seguranca/porta/cmd"
+      state_topic: "home/seguranca/porta/state"
+      payload_lock: "TRAVAR"
+      payload_unlock: "DESTRANCAR"
+      state_locked: "TRANCADO"
+      state_unlocked: "DESTRANCADO"
+
+  button:
+    - name: "Abrir Portao Interfone"
+      command_topic: "home/interfone/abrir"
+      payload_press: "ABRIR"
+      device_class: update
+
+  select:
+    - name: "Letreiro Reuniao"
+      command_topic: "home/escritorio/status"
+      options:
+        - "livre"
+        - "foco"
+        - "reuniao"
+
+lovelace:
+  mode: yaml

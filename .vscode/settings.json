@@ -1,0 +1,5 @@
+{
+    "wokwi.serialMonitor": true,
+    "wokwi.serialMonitorBaud": 115200,
+    "wokwi.autostart": false
+}
