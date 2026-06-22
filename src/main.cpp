@@ -27,7 +27,7 @@
 #define PIN_RELE_1        18  // Rele 1 - Pulso power do Home Server
 #define PIN_SERVO         5   // Servo motor - Fechadura eletronica
 #define PIN_DHT           23  // DHT22 - Temperatura do fogao
-#define PIN_BOTAO         34  // Botao do interfone (INPUT c/ resistor pull-up externo)
+#define PIN_BOTAO         14  // Botao do interfone (INPUT_PULLUP)
 #define PIN_RELE_2        12  // Rele 2 - Portao do interfone
 
 // ============================================================================
@@ -151,7 +151,7 @@ void setup() {
     pinMode(PIN_RELE_2, OUTPUT);
     digitalWrite(PIN_RELE_2, LOW);
 
-    pinMode(PIN_BOTAO, INPUT);
+    pinMode(PIN_BOTAO, INPUT_PULLUP);
 
     // NeoPixel
     neoPixel.begin();

@@ -130,17 +130,17 @@ Após cada movimento, publica o estado atual no tópico `home/seguranca/porta/st
 
 ---
 
-## 8. Botão Push-Button (GPIO34)
+## 8. Botão Push-Button (GPIO14)
 
 | Especificação | Detalhe |
 |---|---|
 | **Tipo** | Botão momentâneo NA |
 | **Configuração** | Pull-up externo (Wokwi) / interno |
-| **GPIO** | 34 (entrada ADC, sem pull-up interno programável) |
+| **GPIO** | 14 |
 
 ### Por que foi escolhido
 - **Sensor do interfone**: detecta quando alguém aperta a campainha.
-- **Pull-up externo no GPIO34**: necessário porque o GPIO34 não possui pull-up interno via software.
+- **Pull-up interno no GPIO14**: o ESP32 mantém o pino em HIGH e o botão leva para LOW quando pressionado.
 
 ### Como funciona no projeto
 - Implementa **debounce por software** (50 ms) para evitar leituras espúrias.
@@ -216,5 +216,5 @@ Após cada movimento, publica o estado atual no tópico `home/seguranca/porta/st
 | Relé 1 (Home Server) | 18 | Sinal de controle |
 | Servo (Fechadura) | 5 | PWM |
 | DHT22 (Temp. Fogão) | 23 | Sinal de dados |
-| Botão (Interfone) | 34 | Entrada digital |
+| Botão (Interfone) | 14 | Entrada digital com pull-up interno |
 | Relé 2 (Portão) | 12 | Sinal de controle |
